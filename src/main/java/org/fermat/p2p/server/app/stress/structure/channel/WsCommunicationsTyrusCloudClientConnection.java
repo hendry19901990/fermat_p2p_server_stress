@@ -93,6 +93,11 @@ public class WsCommunicationsTyrusCloudClientConnection {
          */
         registerFermatPacketProcessors();
         
+		/*
+		 * set All PlatformComponentProfile to Register
+		 */
+		setLoaderListPlatformComponentProfileToRegister();
+        
         webSocketContainer = ClientManager.createClient();
         
         /*
@@ -227,20 +232,35 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	}
 	
 	public Integer getTotalProfileToRegister(){
-		return listPlatformComponentProfileToRegister.size() + listOtherComponentToRegister.size();
+		
+		int listRegistered =  0;
+		int listRegisteredOther = 0;
+		
+		if(listPlatformComponentProfileToRegister != null)
+			listRegistered = listPlatformComponentProfileToRegister.size();
+		
+		if(listOtherComponentToRegister != null)
+			listRegisteredOther = listOtherComponentToRegister.size();
+		
+		return listRegistered + listRegisteredOther;
 	}
 	
 	public Integer getTotalProfileRegisteredSuccess(){
-		return listPlatformComponentProfileRegisteredSuccess.size() + listOtherComponentToRegisteredSuccess.size();
+		
+		int listRegistered =  0;
+		int listRegisteredOther = 0;
+		
+		if(listPlatformComponentProfileRegisteredSuccess != null)
+			listRegistered = listPlatformComponentProfileRegisteredSuccess.size();
+		
+		if(listOtherComponentToRegisteredSuccess != null)
+			listRegisteredOther = listOtherComponentToRegisteredSuccess.size();
+		
+		return listRegistered + listRegisteredOther;
 	}
 	
 	public void sendAllListPlatformComponentProfileToRegister() throws CantRegisterComponentException{
-		
-		/*
-		 * set All PlatformComponentProfile to Register
-		 */
-		setLoaderListPlatformComponentProfileToRegister();
-		
+			
 		for(PlatformComponentProfile pToRegister : listPlatformComponentProfileToRegister){
 			
 			if(pToRegister.getPlatformComponentType() != PlatformComponentType.COMMUNICATION_CLOUD_CLIENT){

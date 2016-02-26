@@ -42,7 +42,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	 		/*
 	 		 * Construct the URI to connect to Cloud Server
 	 		 */
-			uri = new URI(ServerConf.WS_PROTOCOL + "127.0.0.1" + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+			uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 			 
 			/*
              * Try to connect whit the cloud server
@@ -53,7 +53,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			/*
 			 * wait 35 seconds to complete All the work of the Network Services
 			 */
-			 TimeUnit.SECONDS.sleep(35);
+			 TimeUnit.MINUTES.sleep(3);
 			 
 			 /*
 			  * Close Connection after complete All the work of the Network Services
@@ -79,10 +79,10 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			 /*
 			  * Calculate % of Profile Registered Success
 			  */
-			 float porcentaje = (totalProfileRegisteredSuccess * 100) / totalProfileToRegister;
+			 //float porcentaje = (totalProfileRegisteredSuccess * 100) / totalProfileToRegister;
 			 
-			 String resultSamplerData = " TotalProfileToRegister " + totalProfileToRegister + " totalProfileRegisteredSuccess " + totalProfileRegisteredSuccess
-					 + " % of ProfileRegisteredSuccess " + porcentaje + " %";
+			 String resultSamplerData = " TotalProfileToRegister " + totalProfileToRegister + 
+					 " totalProfileRegisteredSuccess " + totalProfileRegisteredSuccess ;
 			 
 			 
 			 rv.setSamplerData(resultSamplerData);
@@ -123,7 +123,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	@Override
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
-        params.addArgument("URI", ServerConf.WS_PROTOCOL + "127.0.0.1" + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+        params.addArgument("URI", ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
         return params;
 	}
 	
