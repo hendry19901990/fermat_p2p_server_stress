@@ -453,7 +453,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	
 	public void CloseConnection() throws IOException{
 		
-		if(wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
+		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
 			wsCommunicationsTyrusCloudClientChannel.getClientConnection().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Close All Normally"));
 	
 	}

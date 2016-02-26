@@ -6,9 +6,9 @@
  */
 package org.fermat.p2p.server.app.stress;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.jmeter.config.Arguments;
@@ -23,13 +23,94 @@ import org.fermat.p2p.server.app.stress.structure.crypto.asymmetric.ECCKeyPair;
 public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-
-	static URI uri;
-	static WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection;
 	
+	@Override
 	public SampleResult runTest(JavaSamplerContext context) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		URI uri;
+		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = null;
+		ECCKeyPair par = new ECCKeyPair();
+		
+		/*
+		 *  Start the plugin JMeter
+		 */
+		 SampleResult rv = new SampleResult();
+	     rv.sampleStart();
+	     
+	 	 try {
+			 
+	 		/*
+	 		 * Construct the URI to connect to Cloud Server
+	 		 */
+			uri = new URI(ServerConf.WS_PROTOCOL + "127.0.0.1" + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+			 
+			/*
+             * Try to connect whit the cloud server
+             */
+			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
+			wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
+			
+			/*
+			 * wait 35 seconds to complete All the work of the Network Services
+			 */
+			 TimeUnit.SECONDS.sleep(35);
+			 
+			 /*
+			  * Close Connection after complete All the work of the Network Services
+			  */
+			 wsCommunicationsTyrusCloudClientConnection.CloseConnection();
+			 
+			 /*
+			  * get the total Profile To Register
+			  */
+			 int totalProfileToRegister = wsCommunicationsTyrusCloudClientConnection.getTotalProfileToRegister();
+			 
+			 /*
+			  * get the total Profile To Registered Success
+			  */
+			 int totalProfileRegisteredSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalProfileRegisteredSuccess();
+			 
+			 /*
+			  * set true and the Response Code 200, the work has been OK
+			  */
+			 rv.setSuccessful(true);
+			 rv.setResponseCode("200");
+			 
+			 /*
+			  * Calculate % of Profile Registered Success
+			  */
+			 float porcentaje = (totalProfileRegisteredSuccess * 100) / totalProfileToRegister;
+			 
+			 String resultSamplerData = " TotalProfileToRegister " + totalProfileToRegister + " totalProfileRegisteredSuccess " + totalProfileRegisteredSuccess
+					 + " % of ProfileRegisteredSuccess " + porcentaje + " %";
+			 
+			 
+			 rv.setSamplerData(resultSamplerData);
+			 rv.setResponseMessage(resultSamplerData);
+			
+		  } catch (Exception e) {
+			  
+			  /*
+			   * set true and the Response Code 500, the work has been BAD
+			   */
+			  rv.setSuccessful(false);
+			  rv.setResponseCode("500");
+			  rv.setResponseMessage("Exception: " + e);
+			
+			  try {
+				  if(wsCommunicationsTyrusCloudClientConnection!=null)
+					  wsCommunicationsTyrusCloudClientConnection.CloseConnection();
+			  } catch (IOException e1) {
+				//e1.printStackTrace();
+			  }
+			
+			//e.printStackTrace();
+		  }
+	 	 
+	 	rv.sampleEnd();
+		  	     
+	        
+		return rv;
 	}
 	
 	
@@ -41,11 +122,13 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	
 	@Override
     public Arguments getDefaultParameters() {
-		// TODO Auto-generated method stub
-		return null;
+        Arguments params = new Arguments();
+        params.addArgument("URI", ServerConf.WS_PROTOCOL + "127.0.0.1" + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+        return params;
 	}
 	
-	public static void main(String args[]) throws Exception{
+/*	
+   public static void main(String args[]) throws Exception{
 		
 		long time_start, time_end;
 		time_start = System.currentTimeMillis();
@@ -56,13 +139,9 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
 		 wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 		 
-		 
 	    try {
 
-		   /*
-		    * Wait 1 second to avoid that the Network Services are Initialized completely
-		    */
-		           TimeUnit.SECONDS.sleep(35);
+		   TimeUnit.SECONDS.sleep(35);
 		} catch (InterruptedException e) {
 		   e.printStackTrace();
 		}
@@ -76,10 +155,9 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 
 		 System.out.println("*********************** RESULTS  *************************");
 		 System.out.println("totalToRegister "+totalToRegister+" totalRegisteredSuccess "+totalRegisteredSuccess);
-		 
 		 System.out.println("the task has taken "+ ( time_end - time_start ) +" milliseconds");
 	}
-	
+*/	
 	
 	
 }
