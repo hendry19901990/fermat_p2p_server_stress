@@ -17,7 +17,7 @@ import java.math.BigInteger;
 
 public class AsymmetricCryptography {
 
-	private final static AsymmetricCipher cipher = new AsymmetricCipher();
+	//private final static AsymmetricCipher cipher = new AsymmetricCipher();
 	private final static AsymmetricKeyCreator keyCreator = new AsymmetricKeyCreator();
 	private final static RandomBigIntegerGenerator randomizer = new RandomBigIntegerGenerator();
 	
