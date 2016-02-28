@@ -45,7 +45,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
      */
     private WsCommunicationsTyrusCloudClientChannel wsCommunicationsTyrusCloudClientChannel;
     
-  	/**
+	/**
      * Represent the webSocketContainer
      */
     private ClientManager webSocketContainer;
@@ -476,6 +476,15 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
 			wsCommunicationsTyrusCloudClientChannel.getClientConnection().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Close All Normally"));
 	
+	}
+	
+  	public WsCommunicationsTyrusCloudClientChannel getWsCommunicationsTyrusCloudClientChannel() {
+  		
+  		if(wsCommunicationsTyrusCloudClientChannel != null)
+  			return wsCommunicationsTyrusCloudClientChannel;
+  		else
+  			return null;
+  		
 	}
 	
 	

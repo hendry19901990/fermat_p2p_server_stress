@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.nio.ByteBuffer;
 
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
@@ -18,6 +19,7 @@ import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.PongMessage;
 import javax.websocket.Session;
 import javax.websocket.DeploymentException;
 
@@ -183,6 +185,23 @@ public class WsCommunicationsTyrusCloudClientChannel {
             e.printStackTrace();
         }
     }
+    
+    public void sendPing() throws IOException {
+
+        System.out.println(" WsCommunicationsTyrusCloudClientChannel - Sending ping to the node...");
+
+        String pingString = "PING";
+        ByteBuffer pingData = ByteBuffer.allocate(pingString.getBytes().length);
+        pingData.put(pingString.getBytes()).flip();
+        getClientConnection().getBasicRemote().sendPing(pingData);
+
+    }
+    
+    @OnMessage
+    public void onPongMessage(PongMessage message) {
+        System.out.println(" WsCommunicationsTyrusCloudClientChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
+    }
+
     
     private void validateFermatPacketSignature(FermatPacket fermatPacketReceive){
 

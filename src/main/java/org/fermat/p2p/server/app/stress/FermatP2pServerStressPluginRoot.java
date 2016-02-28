@@ -9,12 +9,15 @@ package org.fermat.p2p.server.app.stress;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.fermat.p2p.server.app.stress.structure.channel.WsCommunicationsCloudClientSupervisorConnectionAgent;
 import org.fermat.p2p.server.app.stress.structure.channel.WsCommunicationsTyrusCloudClientConnection;
 import org.fermat.p2p.server.app.stress.structure.conf.ServerConf;
 import org.fermat.p2p.server.app.stress.structure.crypto.asymmetric.ECCKeyPair;
@@ -30,6 +33,10 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		URI uri;
 		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = null;
 		ECCKeyPair par = new ECCKeyPair();
+		/*
+	     * Represent the executor
+	     */
+		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 		
 		/*
 		 *  Start the plugin JMeter
@@ -50,8 +57,14 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
 			wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 			
+	         /*
+	          * Scheduled the reconnection agent
+	          */
+	        scheduledExecutorService.scheduleAtFixedRate(new WsCommunicationsCloudClientSupervisorConnectionAgent(wsCommunicationsTyrusCloudClientConnection), 10, 20, TimeUnit.SECONDS);
+			 
+			
 			/*
-			 * wait 35 seconds to complete All the work of the Network Services
+			 * wait 3 minutes to complete All the work of the Network Services
 			 */
 			 TimeUnit.MINUTES.sleep(3);
 			 
@@ -87,7 +100,12 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			 
 			 rv.setSamplerData(resultSamplerData);
 			 rv.setResponseMessage(resultSamplerData);
-			
+			 
+			 /*
+			  * stop the scheduledExecutorService
+			  */
+			 scheduledExecutorService.shutdownNow();
+			 
 		  } catch (Exception e) {
 			  
 			  /*
@@ -127,24 +145,41 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
         return params;
 	}
 	
-/*	
+ 
    public static void main(String args[]) throws Exception{
 		
 		long time_start, time_end;
 		time_start = System.currentTimeMillis();
 		
-		 uri = new URI(ServerConf.WS_PROTOCOL + "52.35.64.221" + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+		 /*
+	     * Represent the executor
+	     */
+		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+		
+		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 		 ECCKeyPair par = new ECCKeyPair();
 		 
-		 wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
+		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
 		 wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
+		 
+
+         /*
+          * Scheduled the reconnection agent
+          */
+         scheduledExecutorService.scheduleAtFixedRate(new WsCommunicationsCloudClientSupervisorConnectionAgent(wsCommunicationsTyrusCloudClientConnection), 10, 20, TimeUnit.SECONDS);
 		 
 	    try {
 
-		   TimeUnit.SECONDS.sleep(35);
+		   TimeUnit.MINUTES.sleep(1);
 		} catch (InterruptedException e) {
 		   e.printStackTrace();
 		}
+	    
+		 /*
+		  * stop the scheduledExecutorService
+		  */
+		 scheduledExecutorService.shutdownNow();
+		 
 		 wsCommunicationsTyrusCloudClientConnection.CloseConnection();
 		 
 		 time_end = System.currentTimeMillis();
@@ -157,7 +192,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 System.out.println("totalToRegister "+totalToRegister+" totalRegisteredSuccess "+totalRegisteredSuccess);
 		 System.out.println("the task has taken "+ ( time_end - time_start ) +" milliseconds");
 	}
-*/	
+ 
 	
 	
 }
