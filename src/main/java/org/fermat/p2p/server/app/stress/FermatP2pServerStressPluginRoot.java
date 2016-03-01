@@ -84,22 +84,25 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			 int totalProfileRegisteredSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalProfileRegisteredSuccess();
 			 
 			 /*
+			  * get the total Request Connect Done
+			  */
+			 int totalRequestConnect = wsCommunicationsTyrusCloudClientConnection.getTotalListOfRequestConnect();
+			 int totalRequestConnectSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalListOfRequestConnectSuccess();
+			 
+			 /*
 			  * set true and the Response Code 200, the work has been OK
 			  */
 			 rv.setSuccessful(true);
 			 rv.setResponseCode("200");
 			 
-			 /*
-			  * Calculate % of Profile Registered Success
-			  */
-			 //float porcentaje = (totalProfileRegisteredSuccess * 100) / totalProfileToRegister;
-			 
 			 String resultSamplerData = " TotalProfileToRegister " + totalProfileToRegister + 
 					 " totalProfileRegisteredSuccess " + totalProfileRegisteredSuccess ;
 			 
+			 String resultSampleData2 = "\n TotalRequestConnect "+totalRequestConnect+" TotalConnectSuccess "+totalRequestConnectSuccess;
 			 
-			 rv.setSamplerData(resultSamplerData);
-			 rv.setResponseMessage(resultSamplerData);
+			 
+			 rv.setSamplerData(resultSamplerData + resultSampleData2);
+			 rv.setResponseMessage(resultSamplerData + resultSampleData2);
 			 
 			 /*
 			  * stop the scheduledExecutorService
@@ -148,25 +151,19 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
  
    public static void main(String args[]) throws Exception{
 		
-		long time_start, time_end;
-		time_start = System.currentTimeMillis();
+		//long time_start, time_end;
+		//time_start = System.currentTimeMillis();
 		
-		 /*
-	     * Represent the executor
-	     */
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 		
 		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_PRODUCTION + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
-		 ECCKeyPair par = new ECCKeyPair();
+		ECCKeyPair par = new ECCKeyPair();
 		 
 		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_PRODUCTION, ServerConf.DEFAULT_PORT);
-		 wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
+		wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 		 
 
-         /*
-          * Scheduled the reconnection agent
-          */
-         scheduledExecutorService.scheduleAtFixedRate(new WsCommunicationsCloudClientSupervisorConnectionAgent(wsCommunicationsTyrusCloudClientConnection), 10, 20, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new WsCommunicationsCloudClientSupervisorConnectionAgent(wsCommunicationsTyrusCloudClientConnection), 10, 20, TimeUnit.SECONDS);
 		 
 	    try {
 
@@ -175,22 +172,22 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		   e.printStackTrace();
 		}
 	    
-		 /*
-		  * stop the scheduledExecutorService
-		  */
-		 scheduledExecutorService.shutdownNow();
+		scheduledExecutorService.shutdownNow();
 		 
 		 wsCommunicationsTyrusCloudClientConnection.CloseConnection();
 		 
-		 time_end = System.currentTimeMillis();
+		 //time_end = System.currentTimeMillis();
 		 
 		 int totalToRegister = wsCommunicationsTyrusCloudClientConnection.getTotalProfileToRegister();
-		 
 		 int totalRegisteredSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalProfileRegisteredSuccess();
+		 
+		 int totalRequestConnect = wsCommunicationsTyrusCloudClientConnection.getTotalListOfRequestConnect();
+		 int totalRequestConnectSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalListOfRequestConnectSuccess();
 		 
 		 System.out.println("*********************** RESULTS  *************************");
 		 System.out.println("totalToRegister "+totalToRegister+" totalRegisteredSuccess "+totalRegisteredSuccess);
-		 System.out.println("the task has taken "+ ( time_end - time_start ) +" milliseconds");
+		 System.out.println("TotalRequestConnect "+totalRequestConnect+" TotalConnectSuccess "+totalRequestConnectSuccess);
+		 //System.out.println("the task has taken "+ ( time_end - time_start ) +" milliseconds");
 		 
 	}
  

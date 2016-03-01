@@ -65,6 +65,10 @@ public class WsCommunicationTyrusVPNClient  extends Endpoint{
      */
     private Session vpnClientConnection;
 	
+	public Session getVpnClientConnection() {
+		return vpnClientConnection;
+	}
+
 	public WsCommunicationTyrusVPNClient(WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent, ECCKeyPair vpnClientIdentity, PlatformComponentProfile remoteParticipant, PlatformComponentProfile remoteParticipantNetworkService, String vpnServerIdentity){
 		
 		 this.wsCommunicationTyrusVPNClientManagerAgent = wsCommunicationTyrusVPNClientManagerAgent;

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,12 +18,12 @@ import java.util.concurrent.TimeUnit;
 import javax.websocket.CloseReason;
 import javax.websocket.DeploymentException;
 
+import org.fermat.p2p.server.app.stress.structure.channel.vpn.WsCommunicationTyrusVPNClientManagerAgent;
 import org.fermat.p2p.server.app.stress.structure.commons.components.DeviceLocation;
 import org.fermat.p2p.server.app.stress.structure.commons.components.DiscoveryQueryParametersCommunication;
 import org.fermat.p2p.server.app.stress.structure.commons.components.PlatformComponentProfileCommunication;
 import org.fermat.p2p.server.app.stress.structure.commons.contents.FermatPacketCommunicationFactory;
 import org.fermat.p2p.server.app.stress.structure.commons.contents.FermatPacketEncoder;
-import org.fermat.p2p.server.app.stress.structure.conf.ServerConf;
 import org.fermat.p2p.server.app.stress.structure.crypto.asymmetric.ECCKeyPair;
 import org.fermat.p2p.server.app.stress.structure.enums.FermatPacketType;
 import org.fermat.p2p.server.app.stress.structure.enums.JsonAttNamesConstants;
@@ -364,6 +363,41 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	public Map<NetworkServiceType, List<PlatformComponentProfile>> getListOfRequestConnect() {
 		return listOfRequestConnect;
 	}
+	
+	public Integer getTotalListOfRequestConnect(){
+		
+		int total =  0;
+		
+		if (listOfRequestConnect != null){
+			
+			for(List<PlatformComponentProfile> lp : listOfRequestConnect.values()){
+				if(lp != null)
+				   total = total + lp.size();				
+			}
+			
+		}
+			
+		
+		return total;
+		
+	}
+	
+	public Integer getTotalListOfRequestConnectSuccess(){
+		
+		int total =  0;
+		
+		if (listOfRequestConnectSuccess != null){
+			
+			for(List<PlatformComponentProfile> lp : listOfRequestConnectSuccess.values()){
+				if(lp != null)
+				   total = total + lp.size();				
+			}
+			
+		}
+		
+		return total;
+		
+	}
 
 	public Map<NetworkServiceType, List<PlatformComponentProfile>> getListOfRequestConnectSuccess() {
 		return listOfRequestConnectSuccess;
@@ -388,6 +422,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 			List<PlatformComponentProfile> listNew = new ArrayList<PlatformComponentProfile>();
 			listNew.add(remoteComponent);
 			
+			listOfRequestConnectSuccess.put(networkServiceType, listNew);
 		}
 		
 		switch(networkServiceType){
@@ -463,6 +498,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	 * set All PlatformComponentProfile to Register
 	 */
 	private void setLoaderListPlatformComponentProfileToRegister(){
+
+		ECCKeyPair identity = null;
 		
 		/*
          * Clean all
@@ -527,7 +564,9 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		
 		/* CCP */
 		
-		listPlatformComponentProfileToRegister.put(NetworkServiceType.INTRA_USER, constructPlatformComponentProfileFactory(new ECCKeyPair().getPublicKey(),
+		identity = new ECCKeyPair();
+		intraActorNetworkServicePluginNS.setIdentity(identity);
+		listPlatformComponentProfileToRegister.put(NetworkServiceType.INTRA_USER, constructPlatformComponentProfileFactory(identity.getPublicKey(),
 				"Intra actor Network Service".toLowerCase(),
 				"Intra actor Network Service",
 				NetworkServiceType.INTRA_USER,
@@ -537,6 +576,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		/*
 		 * Actor of INTRA_USER
 		 */
+		
 		listOtherComponentToRegister.put(NetworkServiceType.INTRA_USER, constructPlatformComponentProfileFactory(new ECCKeyPair().getPublicKey(),
 				"ActorIntraUser".toLowerCase(),
 				"Actor Intra User",
@@ -726,6 +766,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
 			wsCommunicationsTyrusCloudClientChannel.getClientConnection().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Close All Normally"));
 	
+		WsCommunicationTyrusVPNClientManagerAgent.getInstance().closeAllVpnConnections();
 	}
 	
   	public WsCommunicationsTyrusCloudClientChannel getWsCommunicationsTyrusCloudClientChannel() {
@@ -743,7 +784,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
   	public void requestDiscoveryRequestVpnConnection(NetworkServiceType networkServiceTypeApplicant, PlatformComponentProfile platformComponentProfile) {
   		
   		
-  		if(!listOfRequestConnect.containsKey(networkServiceTypeApplicant)){
+  		if(platformComponentProfile.getPlatformComponentType() == PlatformComponentType.ACTOR_INTRA_USER && !listOfRequestConnect.containsKey(networkServiceTypeApplicant)){
   			
   			List<PlatformComponentProfile> listCandidates = null;
   			
@@ -782,27 +823,51 @@ public class WsCommunicationsTyrusCloudClientConnection {
            		PlatformComponentProfile platformComponentProfileFirstCandidate  = null; 
             	PlatformComponentProfile platformComponentProfileSecondCandidate = null; 
             	PlatformComponentProfile platformComponentProfileThirdCandidate  = null; 
-            	int n = 0;
+            	int n1 = 0, n2 = 0, n3 = 0;
             	
             	if(listCandidates.size() == 1){
+            	
             		platformComponentProfileFirstCandidate  = listCandidates.get(0);
-            	}else{
-            		n = new Random().nextInt(listCandidates.size() - 1);
-            		platformComponentProfileFirstCandidate  = listCandidates.get(n);
-            		System.out.print("N vale : "+n);
+            	
+            	}else if(listCandidates.size() > 1){
+            		
+            		n1 = new Random().nextInt(listCandidates.size() - 1);
+            		platformComponentProfileFirstCandidate  = listCandidates.get(n1);
+            		
             	}
             	
-            	if(listCandidates.size() > 2){
+            	if(listCandidates.size() >= 2){
             		
-            		n = new Random().nextInt(listCandidates.size() - 1);
-            		platformComponentProfileSecondCandidate = listCandidates.get(n);
-            		n = new Random().nextInt(listCandidates.size() - 1);
-            		platformComponentProfileThirdCandidate  = listCandidates.get(n);
+            		while(true){
+            			n2 = new Random().nextInt(listCandidates.size() - 1);
+            			if(n2 != n1){
+            				break;
+            			}
+            		}
+            		
+            		platformComponentProfileSecondCandidate = listCandidates.get(n2);
+            		
+            	}
+            	
+            	if(listCandidates.size() >= 3){  
+            		
+            		int candidatesAleatory = (listCandidates.size() == 3)? 3 : listCandidates.size() - 1;
+            		
+            		while(true){
+            			n3 = new Random().nextInt(candidatesAleatory);
+            			if(n3 != n1 && n3 != n2){
+            				break;
+            			}
+            		}
+            		
+            		platformComponentProfileThirdCandidate  = listCandidates.get(n3);
             		
             	}
             	            	
             	List<PlatformComponentProfile> listCandidatesToStrorage = new ArrayList<PlatformComponentProfile>();
-            	listCandidatesToStrorage.add(platformComponentProfileFirstCandidate);
+            	
+            	if(platformComponentProfileFirstCandidate != null)
+            		listCandidatesToStrorage.add(platformComponentProfileFirstCandidate);
             	
             	if(platformComponentProfileSecondCandidate != null)
             		listCandidatesToStrorage.add(platformComponentProfileSecondCandidate);
@@ -815,9 +880,10 @@ public class WsCommunicationsTyrusCloudClientConnection {
             	
             	try {
             		
-					requestDiscoveryVpnConnection(platformComponentProfile,
-							listPlatformComponentProfileRegisteredSuccess.get(networkServiceTypeApplicant),
-							platformComponentProfileFirstCandidate);
+            		if(platformComponentProfileFirstCandidate != null)
+            			requestDiscoveryVpnConnection(platformComponentProfile,
+            					listPlatformComponentProfileRegisteredSuccess.get(networkServiceTypeApplicant),
+            					platformComponentProfileFirstCandidate);
 					
 					if(platformComponentProfileSecondCandidate != null){
 						requestDiscoveryVpnConnection(platformComponentProfile,
@@ -837,16 +903,10 @@ public class WsCommunicationsTyrusCloudClientConnection {
 					e.printStackTrace();
 				}
             	
-            	
-            	
-            	
             } 
 
-
-  			
   			
   		}
-  		
   		
   	}
   	
@@ -854,14 +914,14 @@ public class WsCommunicationsTyrusCloudClientConnection {
   		
 		switch(networkServiceTypeApplicant){
 		
-		case INTRA_USER:
-			
-			intraActorNetworkServicePluginNS.sethandleNewMessageReceived(platformComponentProfileRemote,fermatMessage);
-			
-			break;
-			
-		default:
-			break;
+			case INTRA_USER:
+				
+				intraActorNetworkServicePluginNS.sethandleNewMessageReceived(platformComponentProfileRemote,fermatMessage);
+				
+				break;
+				
+			default:
+				break;
 		
 		
 		}

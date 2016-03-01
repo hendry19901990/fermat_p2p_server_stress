@@ -171,6 +171,14 @@ public class WsCommunicationTyrusVPNClientManagerAgent {
 
     }
     
+    public void closeRemoteVpnConnection(NetworkServiceType networkServiceType, String remotePlatformComponentProfile){
+    	
+    	if(vpnClientActiveCache.containsKey(networkServiceType))
+    		vpnClientActiveCache.get(networkServiceType).remove(remotePlatformComponentProfile);
+    	
+    	
+    }
+    
     public static WsCommunicationTyrusVPNClientManagerAgent getInstance() {
         return instance;
     }   
