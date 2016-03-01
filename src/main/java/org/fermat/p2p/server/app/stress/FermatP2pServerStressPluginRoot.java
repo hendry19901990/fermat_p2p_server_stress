@@ -54,7 +54,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			/*
              * Try to connect whit the cloud server
              */
-			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
+			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_DEVELOPER_LOCAL, ServerConf.DEFAULT_PORT);
 			wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 			
 	         /*
@@ -66,7 +66,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			/*
 			 * wait 3 minutes to complete All the work of the Network Services
 			 */
-			 TimeUnit.MINUTES.sleep(3);
+			 TimeUnit.MINUTES.sleep(5);
 			 
 			 /*
 			  * Close Connection after complete All the work of the Network Services
@@ -156,10 +156,10 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	     */
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 		
-		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_PRODUCTION + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 		 ECCKeyPair par = new ECCKeyPair();
 		 
-		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par);
+		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_PRODUCTION, ServerConf.DEFAULT_PORT);
 		 wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 		 
 
@@ -170,7 +170,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 
 	    try {
 
-		   TimeUnit.MINUTES.sleep(1);
+		   TimeUnit.MINUTES.sleep(5);
 		} catch (InterruptedException e) {
 		   e.printStackTrace();
 		}
@@ -191,6 +191,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 System.out.println("*********************** RESULTS  *************************");
 		 System.out.println("totalToRegister "+totalToRegister+" totalRegisteredSuccess "+totalRegisteredSuccess);
 		 System.out.println("the task has taken "+ ( time_end - time_start ) +" milliseconds");
+		 
 	}
  
 	

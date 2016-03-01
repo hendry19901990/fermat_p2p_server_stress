@@ -86,8 +86,8 @@ public class CompleteRegistrationComponentTyrusPacketProcessor extends FermatTyr
         
         if (platformComponentProfile.getPlatformComponentType() == PlatformComponentType.COMMUNICATION_CLOUD_CLIENT){
         	
-            if(!getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().contains(platformComponentProfile)){
-            	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().add(platformComponentProfile);
+            if(!getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().containsKey(platformComponentProfile.getNetworkServiceType())){
+            	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().put(networkServiceTypeApplicant, platformComponentProfile);
             }
         	
         	 /*
@@ -108,9 +108,10 @@ public class CompleteRegistrationComponentTyrusPacketProcessor extends FermatTyr
             
         }else if(platformComponentProfile.getPlatformComponentType() == PlatformComponentType.NETWORK_SERVICE){
         	
-        	  if(!getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().contains(platformComponentProfile)){
-              	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().add(platformComponentProfile);
-              }
+        	  if(!getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().containsKey(platformComponentProfile.getNetworkServiceType())){
+              	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getPlatformComponentProfileRegisteredSuccess().put(networkServiceTypeApplicant, platformComponentProfile);
+              	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().setPlatformComponentProfileToNetworkService(networkServiceTypeApplicant);
+        	  }
         	  
         	  /*
         	   * send register the Actor specific of the NETWORK_SERVICE received
@@ -126,8 +127,9 @@ public class CompleteRegistrationComponentTyrusPacketProcessor extends FermatTyr
         		&& platformComponentProfile.getPlatformComponentType() != PlatformComponentType.COMMUNICATION_CLOUD_CLIENT){
         	
         	 if(!getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getListOtherComponentToRegisteredSuccess().containsKey(networkServiceTypeApplicant)){
-               	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getListOtherComponentToRegisteredSuccess().put(networkServiceTypeApplicant,platformComponentProfile);
-               }
+               	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().getListOtherComponentToRegisteredSuccess().put(networkServiceTypeApplicant, platformComponentProfile);
+               	getWsCommunicationsTyrusCloudClientChannel().getWsCommunicationsTyrusCloudClientConnection().requestDiscoveryRequestVpnConnection(networkServiceTypeApplicant, platformComponentProfile);
+        	 }
         	
         }
         

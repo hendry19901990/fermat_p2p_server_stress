@@ -6,6 +6,8 @@
  */
 package org.fermat.p2p.server.app.stress.structure.enums;
 
+import org.fermat.p2p.server.app.stress.structure.interfaces.FermatEnum;
+
 public enum PlatformComponentType implements FermatEnum {
 	
 
