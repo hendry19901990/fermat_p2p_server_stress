@@ -173,8 +173,8 @@ public class WsCommunicationTyrusVPNClientManagerAgent {
     
     public void closeRemoteVpnConnection(NetworkServiceType networkServiceType, String remotePlatformComponentProfile){
     	
-    	if(vpnClientActiveCache.containsKey(networkServiceType))
-    		vpnClientActiveCache.get(networkServiceType).remove(remotePlatformComponentProfile);
+    	if(instance.vpnClientActiveCache.containsKey(networkServiceType))
+    		instance.vpnClientActiveCache.get(networkServiceType).remove(remotePlatformComponentProfile);
     	
     	
     }
@@ -185,7 +185,7 @@ public class WsCommunicationTyrusVPNClientManagerAgent {
     
     
     public void handleNewMessageReceived(NetworkServiceType networkServiceTypeApplicant, PlatformComponentProfile platformComponentProfileRemote, FermatMessage fermatMessage){
-    	WsCommunicationsTyrusCloudClientConnection.handleNewMessageReceived(networkServiceTypeApplicant, platformComponentProfileRemote, fermatMessage);
+    	instance.WsCommunicationsTyrusCloudClientConnection.handleNewMessageReceived(networkServiceTypeApplicant, platformComponentProfileRemote, fermatMessage);
     }
     
 

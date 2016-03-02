@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.DeploymentException;
 
@@ -24,6 +25,7 @@ import org.fermat.p2p.server.app.stress.structure.commons.components.DiscoveryQu
 import org.fermat.p2p.server.app.stress.structure.commons.components.PlatformComponentProfileCommunication;
 import org.fermat.p2p.server.app.stress.structure.commons.contents.FermatPacketCommunicationFactory;
 import org.fermat.p2p.server.app.stress.structure.commons.contents.FermatPacketEncoder;
+import org.fermat.p2p.server.app.stress.structure.conf.CLoudClientConfigurator;
 import org.fermat.p2p.server.app.stress.structure.crypto.asymmetric.ECCKeyPair;
 import org.fermat.p2p.server.app.stress.structure.enums.FermatPacketType;
 import org.fermat.p2p.server.app.stress.structure.enums.JsonAttNamesConstants;
@@ -86,6 +88,13 @@ public class WsCommunicationsTyrusCloudClientConnection {
     
     private ECCKeyPair clientIdentity;
     
+    private CLoudClientConfigurator cloudClientConfigurator;
+    
+	  /**
+     * Represent the temporalIdentity
+     */
+    private ECCKeyPair temporalIdentity;
+    
     /*
      * IP of the Cloud Server
      */
@@ -114,15 +123,16 @@ public class WsCommunicationsTyrusCloudClientConnection {
         this.clientIdentity = clientIdentity;
         this.ServerIp = ServerIp;
         this.ServerPort = ServerPort;
-        this.wsCommunicationsTyrusCloudClientChannel = new WsCommunicationsTyrusCloudClientChannel(this,  this.clientIdentity);
-        this.webSocketContainer = ClientManager.createClient();
-        listPlatformComponentProfileToRegister = new  HashMap<NetworkServiceType,PlatformComponentProfile>();
-        listPlatformComponentProfileRegisteredSuccess = new HashMap<NetworkServiceType,PlatformComponentProfile>();
-        listOtherComponentToRegister = new HashMap<NetworkServiceType,PlatformComponentProfile>();
-        listOtherComponentToRegisteredSuccess = new HashMap<NetworkServiceType,PlatformComponentProfile>();
-        listOfRequestConnect = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
-        listOfRequestConnectSuccess = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
-        intraActorNetworkServicePluginNS = new IntraActorNetworkServicePlugin();
+        this.temporalIdentity = new ECCKeyPair();
+        this.wsCommunicationsTyrusCloudClientChannel = new WsCommunicationsTyrusCloudClientChannel(this,  this.clientIdentity, this.temporalIdentity);
+        this.cloudClientConfigurator = new CLoudClientConfigurator(this.temporalIdentity);
+        this.listPlatformComponentProfileToRegister = new  HashMap<NetworkServiceType,PlatformComponentProfile>();
+        this.listPlatformComponentProfileRegisteredSuccess = new HashMap<NetworkServiceType,PlatformComponentProfile>();
+        this.listOtherComponentToRegister = new HashMap<NetworkServiceType,PlatformComponentProfile>();
+        this.listOtherComponentToRegisteredSuccess = new HashMap<NetworkServiceType,PlatformComponentProfile>();
+        this.listOfRequestConnect = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
+        this.listOfRequestConnectSuccess = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
+        this.intraActorNetworkServicePluginNS = new IntraActorNetworkServicePlugin();
     }
     
     public void initializeAndConnect() throws IOException, DeploymentException {
@@ -139,10 +149,15 @@ public class WsCommunicationsTyrusCloudClientConnection {
         
         webSocketContainer = ClientManager.createClient();
         
+        ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
+                .configurator(cloudClientConfigurator)
+                .build();
+
+        
         /*
          * Connect
          */
-        webSocketContainer.connectToServer(wsCommunicationsTyrusCloudClientChannel, uri);
+        webSocketContainer.connectToServer(wsCommunicationsTyrusCloudClientChannel, clientConfig, uri);
         
     }
     
@@ -415,7 +430,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		
 		if(listOfRequestConnectSuccess.containsKey(networkServiceType)){
 			
-			listOfRequestConnectSuccess.get(listOfRequestConnectSuccess).add(remoteComponent);
+			listOfRequestConnectSuccess.get(networkServiceType).add(remoteComponent);
 			
 		}else{
 			
@@ -700,7 +715,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	 public List<PlatformComponentProfile> requestListComponentRegistered(DiscoveryQueryParameters discoveryQueryParameters) throws Exception {
 
 	        System.out.println("WsCommunicationsCloudClientConnection - new requestListComponentRegistered");
-	        List<PlatformComponentProfile> resultList = new ArrayList<>();
+	        List<PlatformComponentProfile> resultList = null;
 
 	        /*
 	         * Validate parameter
@@ -710,6 +725,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	        }
 
 	        try {
+	        	
+	        	resultList = new ArrayList<>();
 
 	            /*
 	             * Construct the parameters
@@ -763,7 +780,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 	
 	public void CloseConnection() throws IOException{
 		
-		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
+		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection() != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
 			wsCommunicationsTyrusCloudClientChannel.getClientConnection().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Close All Normally"));
 	
 		WsCommunicationTyrusVPNClientManagerAgent.getInstance().closeAllVpnConnections();

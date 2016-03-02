@@ -15,6 +15,9 @@ import java.nio.ByteBuffer;
 
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -35,8 +38,8 @@ import org.fermat.p2p.server.app.stress.structure.interfaces.PlatformComponentPr
 import org.fermat.p2p.server.app.stress.structure.processors.FermatTyrusPacketProcessor;
 
 
-@ClientEndpoint(configurator = CLoudClientConfigurator.class)
-public class WsCommunicationsTyrusCloudClientChannel {
+
+public class WsCommunicationsTyrusCloudClientChannel extends Endpoint{
 	
 	
 	  /**
@@ -76,28 +79,39 @@ public class WsCommunicationsTyrusCloudClientChannel {
      */
     private Session clientConnection;
     
-    public WsCommunicationsTyrusCloudClientChannel(WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection, ECCKeyPair clientIdentity) throws IOException, DeploymentException{
+    public WsCommunicationsTyrusCloudClientChannel(WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection, ECCKeyPair clientIdentity, ECCKeyPair temporalIdentity) throws IOException, DeploymentException{
     	
         this.clientIdentity = clientIdentity;
-        this.temporalIdentity = CLoudClientConfigurator.tempIdentity;
         this.packetProcessorsRegister = new ConcurrentHashMap<>();
         this.wsCommunicationsTyrusCloudClientConnection = wsCommunicationsTyrusCloudClientConnection;
         this.isRegister = Boolean.FALSE;
-        
+        this.temporalIdentity = temporalIdentity;
         
         setPlatformComponentProfile(wsCommunicationsTyrusCloudClientConnection.constructPlatformComponentProfileFactory(clientIdentity.getPublicKey(), "WsCommunicationsCloudClientChannel",  "Web Socket Communications Cloud Client", NetworkServiceType.UNDEFINED, PlatformComponentType.COMMUNICATION_CLOUD_CLIENT, null));
     	
     }
 	
-    @OnOpen
-    public void onOpen(final Session session) {
-
-        System.out.println(" --------------------------------------------------------------------- ");
+    @Override
+    public void onOpen(final Session session, EndpointConfig config) {
+    	
+    	
+    	System.out.println(" --------------------------------------------------------------------- ");
         System.out.println(" WsCommunicationsTyrusCloudClientChannel - Starting method onOpen");
         System.out.println(" WsCommunicationsTyrusCloudClientChannel - id = "+session.getId());
         System.out.println(" WsCommunicationsTyrusCloudClientChannel - url = "+session.getRequestURI());
 
         this.clientConnection = session;
+        
+        /*
+	     * Configure message handler
+	     */
+	     session.addMessageHandler(new MessageHandler.Whole<String>() {
+	          @Override
+	          public void onMessage(String fermatPacketEncode) {
+	                processMessage(fermatPacketEncode);
+	          }
+	     });
+	     
     }
     
     public void sendMessage(final String message) {
@@ -108,8 +122,8 @@ public class WsCommunicationsTyrusCloudClientChannel {
     
     
     
-    @OnMessage
-    public void onMessage(String fermatPacketEncode) {
+    
+    public void processMessage(String fermatPacketEncode) {
     	
     	   //System.out.println(" --------------------------------------------------------------------- ");
            //System.out.println(" WsCommunicationsTyrusCloudClientChannel - Starting method onMessage(String)");
@@ -166,7 +180,7 @@ public class WsCommunicationsTyrusCloudClientChannel {
     	
     }
     
-    @OnClose
+    @Override
     public void onClose(final Session session, final CloseReason reason) {
     	
         System.out.println(" --------------------------------------------------------------------- ");
@@ -174,7 +188,7 @@ public class WsCommunicationsTyrusCloudClientChannel {
     	
     }
     
-    @OnError
+    @Override
     public void onError(Session session, Throwable t) {
         try {
             System.out.println(" --------------------------------------------------------------------- ");

@@ -21,19 +21,24 @@ import com.google.gson.JsonObject;
 
 public class CLoudClientConfigurator extends ClientEndpointConfig.Configurator{
 	
-	  /*
+	/*
      * Create a new temporal identity
      */
-    public final static ECCKeyPair tempIdentity = new ECCKeyPair();
+	private ECCKeyPair tempIdentity = new ECCKeyPair();
+    
+    public CLoudClientConfigurator(ECCKeyPair tempIdentity){
+    	this.tempIdentity = tempIdentity;
+    }
+ 
 
     @Override
     public void beforeRequest(Map<String, List<String>> headers) {
-
+    	
          /*
          * Get json representation
          */
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(JsonAttNamesConstants.NAME_IDENTITY, tempIdentity.getPublicKey());
+        jsonObject.addProperty(JsonAttNamesConstants.NAME_IDENTITY, this.tempIdentity.getPublicKey());
 
         /*
          * Add the att to the header
@@ -45,5 +50,7 @@ public class CLoudClientConfigurator extends ClientEndpointConfig.Configurator{
     @Override
     public void afterResponse(HandshakeResponse hr) {
     }
-
+    
+     
+    
 }
