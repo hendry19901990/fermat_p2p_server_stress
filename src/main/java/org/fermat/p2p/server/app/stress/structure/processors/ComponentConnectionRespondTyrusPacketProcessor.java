@@ -23,9 +23,11 @@ import java.net.URI;
 
 public class ComponentConnectionRespondTyrusPacketProcessor extends FermatTyrusPacketProcessor{
 
+	private WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent;
 	
-	public ComponentConnectionRespondTyrusPacketProcessor(WsCommunicationsTyrusCloudClientChannel wsCommunicationsTyrusCloudClientChannel) {
+	public ComponentConnectionRespondTyrusPacketProcessor(WsCommunicationsTyrusCloudClientChannel wsCommunicationsTyrusCloudClientChannel, WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent) {
 	  super(wsCommunicationsTyrusCloudClientChannel);
+	  this.wsCommunicationTyrusVPNClientManagerAgent = wsCommunicationTyrusVPNClientManagerAgent;
 	}
 
 	@Override
@@ -65,7 +67,7 @@ public class ComponentConnectionRespondTyrusPacketProcessor extends FermatTyrusP
             /*
              * Get the  wsCommunicationVPNClientManagerAgent
              */
-            WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent = WsCommunicationTyrusVPNClientManagerAgent.getInstance();
+            //WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent = WsCommunicationTyrusVPNClientManagerAgent.getInstance();
 
             /*
              * Create a new VPN client

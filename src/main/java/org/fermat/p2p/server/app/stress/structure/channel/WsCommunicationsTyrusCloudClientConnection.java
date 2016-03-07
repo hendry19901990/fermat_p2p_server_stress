@@ -109,6 +109,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
     
     private IntraActorNetworkServicePlugin intraActorNetworkServicePluginNS;
     
+    private WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent;
+    
     /* Network Services */
     
     /*
@@ -132,7 +134,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
         this.listOtherComponentToRegisteredSuccess = new HashMap<NetworkServiceType,PlatformComponentProfile>();
         this.listOfRequestConnect = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
         this.listOfRequestConnectSuccess = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
-        this.intraActorNetworkServicePluginNS = new IntraActorNetworkServicePlugin();
+        this.wsCommunicationTyrusVPNClientManagerAgent = new WsCommunicationTyrusVPNClientManagerAgent();
+        this.intraActorNetworkServicePluginNS = new IntraActorNetworkServicePlugin(this.wsCommunicationTyrusVPNClientManagerAgent);
     }
     
     public void initializeAndConnect() throws IOException, DeploymentException {
@@ -177,7 +180,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
         wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new ServerHandshakeRespondTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel));
         wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new CompleteRegistrationComponentTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel));
         wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new FailureComponentRegistrationRequestTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel));
-        wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new ComponentConnectionRespondTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel));
+        wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new ComponentConnectionRespondTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel, this.wsCommunicationTyrusVPNClientManagerAgent));
         wsCommunicationsTyrusCloudClientChannel.registerFermatPacketProcessor(new CompleteComponentConnectionRequestTyrusPacketProcessor(wsCommunicationsTyrusCloudClientChannel));
     }
 	
@@ -430,7 +433,9 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		
 		if(listOfRequestConnectSuccess.containsKey(networkServiceType)){
 			
-			listOfRequestConnectSuccess.get(networkServiceType).add(remoteComponent);
+			if(!listOfRequestConnectSuccess.get(networkServiceType).contains(remoteComponent))
+				listOfRequestConnectSuccess.get(networkServiceType).add(remoteComponent);
+			
 			
 		}else{
 			
@@ -445,7 +450,6 @@ public class WsCommunicationsTyrusCloudClientConnection {
 			case INTRA_USER:
 				
 				intraActorNetworkServicePluginNS.setRemotePlatformComponentProfile(remoteComponent);
-				intraActorNetworkServicePluginNS.initializationCommunication(remoteComponent);
 				
 				break;
 				
@@ -737,7 +741,9 @@ public class WsCommunicationsTyrusCloudClientConnection {
 
 	            // Create a new RestTemplate instance
 	            RestTemplate restTemplate = new RestTemplate();
+	            //String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/api/components/registered", parameters, String.class);
 	            String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/components/registered", parameters, String.class);
+
 
 	            /*
 	             * if respond have the result list
@@ -783,7 +789,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
 		if(wsCommunicationsTyrusCloudClientChannel != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection() != null && wsCommunicationsTyrusCloudClientChannel.getClientConnection().isOpen())
 			wsCommunicationsTyrusCloudClientChannel.getClientConnection().close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Close All Normally"));
 	
-		WsCommunicationTyrusVPNClientManagerAgent.getInstance().closeAllVpnConnections();
+		wsCommunicationTyrusVPNClientManagerAgent.closeAllVpnConnections();
 	}
 	
   	public WsCommunicationsTyrusCloudClientChannel getWsCommunicationsTyrusCloudClientChannel() {

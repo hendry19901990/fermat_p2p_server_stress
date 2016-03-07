@@ -49,12 +49,12 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	 		/*
 	 		 * Construct the URI to connect to Cloud Server
 	 		 */
-			uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_PRODUCTION + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+			uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 			 
 			/*
              * Try to connect whit the cloud server
              */
-			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_PRODUCTION, ServerConf.DEFAULT_PORT);
+			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_DEVELOPER_LOCAL, ServerConf.DEFAULT_PORT);
 			wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 			
 	         /*
@@ -126,8 +126,9 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			  }
 			
 			//e.printStackTrace();
-		  }
+		  } 
 	 	 
+	 	//rv.setEndTime(System.currentTimeMillis()); 
 	 	rv.sampleEnd();
 		  	     
 	        
@@ -148,8 +149,8 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
         return params;
 	}
 	
- 
- /*  public static void main(String args[]) throws Exception{
+
+ public static void main(String args[]) throws Exception{
 			
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 		
@@ -170,10 +171,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		}
 	    
 		scheduledExecutorService.shutdownNow();
-		 
-		 wsCommunicationsTyrusCloudClientConnection.CloseConnection();
-		 
-		  
+		wsCommunicationsTyrusCloudClientConnection.CloseConnection();
 		 
 		 int totalToRegister = wsCommunicationsTyrusCloudClientConnection.getTotalProfileToRegister();
 		 int totalRegisteredSuccess = wsCommunicationsTyrusCloudClientConnection.getTotalProfileRegisteredSuccess();
@@ -186,7 +184,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 System.out.println("TotalRequestConnect "+totalRequestConnect+" TotalConnectSuccess "+totalRequestConnectSuccess);
 		  
 	}
- */
+
 	
 	
 }

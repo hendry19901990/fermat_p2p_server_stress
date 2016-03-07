@@ -6,13 +6,10 @@
  */
 package org.fermat.p2p.server.app.stress.structure.network_services.CCP.intra_actor;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.websocket.CloseReason;
 
 import org.fermat.p2p.server.app.stress.structure.channel.vpn.WsCommunicationTyrusVPNClient;
 import org.fermat.p2p.server.app.stress.structure.channel.vpn.WsCommunicationTyrusVPNClientManagerAgent;
@@ -21,7 +18,6 @@ import org.fermat.p2p.server.app.stress.structure.enums.FermatMessageContentType
 import org.fermat.p2p.server.app.stress.structure.enums.NetworkServiceType;
 import org.fermat.p2p.server.app.stress.structure.enums.ccp_intra_actor.ActorProtocolState;
 import org.fermat.p2p.server.app.stress.structure.enums.ccp_intra_actor.NotificationDescriptor;
-import org.fermat.p2p.server.app.stress.structure.exceptions.FMPException;
 import org.fermat.p2p.server.app.stress.structure.interfaces.FermatMessage;
 import org.fermat.p2p.server.app.stress.structure.interfaces.PlatformComponentProfile;
 import org.fermat.p2p.server.app.stress.structure.commons.contents.*;
@@ -49,7 +45,10 @@ public class IntraActorNetworkServicePlugin {
 	
 	private ECCKeyPair identity;
 	
-	public IntraActorNetworkServicePlugin(){
+	private WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent;
+	
+	public IntraActorNetworkServicePlugin(WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent){
+		this.wsCommunicationTyrusVPNClientManagerAgent = wsCommunicationTyrusVPNClientManagerAgent;
 		listRemotePlatformComponentProfile = new ArrayList<PlatformComponentProfile>();
 	}
 	
@@ -66,7 +65,7 @@ public class IntraActorNetworkServicePlugin {
 	 */
 	public void initializationCommunication(PlatformComponentProfile remotePlatformComponentProfile){
 		
-		WsCommunicationTyrusVPNClient communicationTyrusVPNClient = WsCommunicationTyrusVPNClientManagerAgent.getInstance().getActiveVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile); 
+		WsCommunicationTyrusVPNClient communicationTyrusVPNClient = wsCommunicationTyrusVPNClientManagerAgent.getActiveVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile); 
 		
 		   UUID newNotificationID = UUID.randomUUID();
            NotificationDescriptor notificationDescriptor = NotificationDescriptor.ASKFORACCEPTANCE;
@@ -119,10 +118,12 @@ public class IntraActorNetworkServicePlugin {
 		return listRemotePlatformComponentProfile;
 	}
 
-	public void setRemotePlatformComponentProfile(PlatformComponentProfile RemotePlatformComponentProfile) {
+	public void setRemotePlatformComponentProfile(PlatformComponentProfile remotePlatformComponentProfile) {
 		
-		if(!listRemotePlatformComponentProfile.contains(RemotePlatformComponentProfile))
-			this.listRemotePlatformComponentProfile.add(RemotePlatformComponentProfile);
+		if(!listRemotePlatformComponentProfile.contains(remotePlatformComponentProfile)){
+			this.listRemotePlatformComponentProfile.add(remotePlatformComponentProfile);
+			initializationCommunication(remotePlatformComponentProfile);
+		}
 		
 	}
 
@@ -143,7 +144,7 @@ public class IntraActorNetworkServicePlugin {
 
   	public void sethandleNewMessageReceived(PlatformComponentProfile remotePlatformComponentProfile, FermatMessage fermatMessage){
   		
-  		WsCommunicationTyrusVPNClient communicationTyrusVPNClient = WsCommunicationTyrusVPNClientManagerAgent.getInstance().getActiveVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile); 
+  		WsCommunicationTyrusVPNClient communicationTyrusVPNClient = wsCommunicationTyrusVPNClientManagerAgent.getActiveVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile); 
 		
   		/*
          * Decrypt the message content
@@ -196,11 +197,11 @@ public class IntraActorNetworkServicePlugin {
   			
             System.out.println("----------------------------\n" +
                     "Message Delivery " +
-                    "Close Connection" + actorNetworkServiceRecord.getActorSenderAlias()
+                    "Close Connection " + actorNetworkServiceRecord.getActorSenderAlias()
                     + "\n-------------------------------------------------");
   			
   		   communicationTyrusVPNClient.close();
-  		   WsCommunicationTyrusVPNClientManagerAgent.getInstance().closeRemoteVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile.getIdentityPublicKey());
+  		   wsCommunicationTyrusVPNClientManagerAgent.closeRemoteVpnConnection(networkServiceTypeBase, remotePlatformComponentProfile.getIdentityPublicKey());
 			
   			break;
   			
@@ -261,11 +262,13 @@ public class IntraActorNetworkServicePlugin {
          ActorProtocolState protocolState = ActorProtocolState.PROCESSING_SEND;
          //actorNetworkServiceRecord.changeDescriptor(NotificationDescriptor.RECEIVED);
          
+         String image = "";
+         
          ActorNetworkServiceRecord actorNetworkServiceRecordToSend = new ActorNetworkServiceRecord(
                  newNotificationID,
                  actorNetworkServiceRecord.getActorSenderAlias(),
                  actorNetworkServiceRecord.getActorSenderPhrase(),
-                 actorNetworkServiceRecord.getActorSenderProfileImage(),
+                 image.getBytes(),
                  actorNetworkServiceRecord.getNotificationDescriptor(),
                  actorNetworkServiceRecord.getActorDestinationType(),
                  actorNetworkServiceRecord.getActorSenderType(),
