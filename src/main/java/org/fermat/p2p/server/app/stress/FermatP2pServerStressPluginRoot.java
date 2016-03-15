@@ -49,12 +49,12 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	 		/*
 	 		 * Construct the URI to connect to Cloud Server
 	 		 */
-			uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_LOCAL + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+			uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_AWS + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 			 
 			/*
              * Try to connect whit the cloud server
              */
-			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_DEVELOPER_LOCAL, ServerConf.DEFAULT_PORT);
+			wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_DEVELOPER_AWS, ServerConf.DEFAULT_PORT);
 			wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 			
 	         /*
@@ -71,6 +71,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			 /*
 			  * Close Connection after complete All the work of the Network Services
 			  */
+			 wsCommunicationsTyrusCloudClientConnection.setNotTryToReconnectToCloud();
 			 wsCommunicationsTyrusCloudClientConnection.CloseConnection();
 			 
 			 /*
@@ -119,8 +120,10 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 			  rv.setResponseMessage("Exception: " + e);
 			
 			  try {
-				  if(wsCommunicationsTyrusCloudClientConnection!=null)
+				  if(wsCommunicationsTyrusCloudClientConnection!=null){
+					  wsCommunicationsTyrusCloudClientConnection.setNotTryToReconnectToCloud();
 					  wsCommunicationsTyrusCloudClientConnection.CloseConnection();
+				  }
 			  } catch (IOException e1) {
 				//e1.printStackTrace();
 			  }
@@ -145,19 +148,19 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 	@Override
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
-        params.addArgument("URI", ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_PRODUCTION + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+        params.addArgument("URI", ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_AWS + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
         return params;
 	}
 	
-
+ /* 
  public static void main(String args[]) throws Exception{
 			
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 		
-		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_PRODUCTION + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
+		URI uri = new URI(ServerConf.WS_PROTOCOL + ServerConf.SERVER_IP_DEVELOPER_AWS + ":" + ServerConf.DEFAULT_PORT + ServerConf.WEB_SOCKET_CONTEXT_PATH);
 		ECCKeyPair par = new ECCKeyPair();
 		 
-		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_PRODUCTION, ServerConf.DEFAULT_PORT);
+		WsCommunicationsTyrusCloudClientConnection wsCommunicationsTyrusCloudClientConnection = new WsCommunicationsTyrusCloudClientConnection(uri, par, ServerConf.SERVER_IP_DEVELOPER_AWS, ServerConf.DEFAULT_PORT);
 		wsCommunicationsTyrusCloudClientConnection.initializeAndConnect();
 		 
 
@@ -171,6 +174,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		}
 	    
 		scheduledExecutorService.shutdownNow();
+		wsCommunicationsTyrusCloudClientConnection.setNotTryToReconnectToCloud();
 		wsCommunicationsTyrusCloudClientConnection.CloseConnection();
 		 
 		 int totalToRegister = wsCommunicationsTyrusCloudClientConnection.getTotalProfileToRegister();
@@ -184,7 +188,7 @@ public class FermatP2pServerStressPluginRoot extends AbstractJavaSamplerClient i
 		 System.out.println("TotalRequestConnect "+totalRequestConnect+" TotalConnectSuccess "+totalRequestConnectSuccess);
 		  
 	}
-
+ */
 	
 	
 }

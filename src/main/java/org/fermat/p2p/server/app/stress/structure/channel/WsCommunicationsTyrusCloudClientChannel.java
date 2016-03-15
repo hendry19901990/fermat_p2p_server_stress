@@ -202,7 +202,7 @@ public class WsCommunicationsTyrusCloudClientChannel extends Endpoint{
     
     public void sendPing() throws IOException {
 
-        //System.out.println(" WsCommunicationsTyrusCloudClientChannel - Sending ping to the node...");
+        System.out.println(" WsCommunicationsTyrusCloudClientChannel - Sending ping to the node...");
 
         String pingString = "PING";
         ByteBuffer pingData = ByteBuffer.allocate(pingString.getBytes().length);
@@ -213,7 +213,7 @@ public class WsCommunicationsTyrusCloudClientChannel extends Endpoint{
     
     @OnMessage
     public void onPongMessage(PongMessage message) {
-        //System.out.println(" WsCommunicationsTyrusCloudClientChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
+        System.out.println(" WsCommunicationsTyrusCloudClientChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
     }
 
     

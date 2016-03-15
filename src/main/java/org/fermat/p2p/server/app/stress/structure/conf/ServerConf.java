@@ -16,7 +16,7 @@ public class ServerConf {
     /**
      * Represent the SERVER_IP in the developer environment
      */
-    public static final String SERVER_IP_DEVELOPER_AWS = "52.11.156.16";
+    public static final String SERVER_IP_DEVELOPER_AWS = "52.37.225.161";
 
     /**
      * Represent the SERVER_IP in the local environment

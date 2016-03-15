@@ -44,6 +44,7 @@ import org.fermat.p2p.server.app.stress.structure.processors.ComponentConnection
 import org.fermat.p2p.server.app.stress.structure.processors.FailureComponentRegistrationRequestTyrusPacketProcessor;
 import org.fermat.p2p.server.app.stress.structure.processors.ServerHandshakeRespondTyrusPacketProcessor;
 import org.glassfish.tyrus.client.ClientManager;
+import org.glassfish.tyrus.client.ClientProperties;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -111,6 +112,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
     
     private WsCommunicationTyrusVPNClientManagerAgent wsCommunicationTyrusVPNClientManagerAgent;
     
+    private boolean tryToReconnect;
+    
     /* Network Services */
     
     /*
@@ -136,6 +139,7 @@ public class WsCommunicationsTyrusCloudClientConnection {
         this.listOfRequestConnectSuccess = new HashMap<NetworkServiceType,List<PlatformComponentProfile>>();
         this.wsCommunicationTyrusVPNClientManagerAgent = new WsCommunicationTyrusVPNClientManagerAgent();
         this.intraActorNetworkServicePluginNS = new IntraActorNetworkServicePlugin(this.wsCommunicationTyrusVPNClientManagerAgent);
+        this.tryToReconnect = Boolean.TRUE;
     }
     
     public void initializeAndConnect() throws IOException, DeploymentException {
@@ -152,9 +156,45 @@ public class WsCommunicationsTyrusCloudClientConnection {
         
         webSocketContainer = ClientManager.createClient();
         
+        
         ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
                 .configurator(cloudClientConfigurator)
                 .build();
+        
+        
+        /*
+         * Create a ReconnectHandler
+         */
+        ClientManager.ReconnectHandler reconnectHandler = new ClientManager.ReconnectHandler() {
+
+            @Override
+            public boolean onDisconnect(CloseReason closeReason) {
+                System.out.println("############################################################");
+                System.out.println("#  WsCommunicationsCloudClientConnection - Reconnecting... #");
+                System.out.println("############################################################");
+                return tryToReconnect;
+            }
+
+            @Override
+            public boolean onConnectFailure(Exception exception) {
+                try {
+
+                    System.out.println("#  WsCommunicationsCloudClientConnection - Reconnect Failure :"+exception.getMessage());
+                    // To avoid potential DDoS when you don't limit number of reconnects, wait to the next try.
+                    Thread.sleep(5000);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return tryToReconnect;
+            }
+
+        };
+        
+        /*
+         * Register the ReconnectHandler
+         */
+        webSocketContainer.getProperties().put(ClientProperties.RECONNECT_HANDLER, reconnectHandler);
 
         
         /*
@@ -162,6 +202,11 @@ public class WsCommunicationsTyrusCloudClientConnection {
          */
         webSocketContainer.connectToServer(wsCommunicationsTyrusCloudClientChannel, clientConfig, uri);
         
+    }
+    
+    
+    public void setNotTryToReconnectToCloud(){
+        tryToReconnect = Boolean.FALSE;
     }
     
     /**
@@ -741,8 +786,8 @@ public class WsCommunicationsTyrusCloudClientConnection {
 
 	            // Create a new RestTemplate instance
 	            RestTemplate restTemplate = new RestTemplate();
-	            //String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/api/components/registered", parameters, String.class);
-	            String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/components/registered", parameters, String.class);
+	            String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/api/components/registered", parameters, String.class);
+	            //String respond = restTemplate.postForObject("http://" + getServerIp() + ":" + getServerPort() + "/fermat/components/registered", parameters, String.class);
 
 
 	            /*
